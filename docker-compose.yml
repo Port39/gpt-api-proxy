@@ -1,0 +1,17 @@
+version: '3.1'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: very_secure_postgres_password
+      POSTGRES_DB: gpt-api-proxy
+  gpt-api-proxy:
+    build: .
+    restart: always
+    environment:
+      API_KEY: "super_secure_api_token"
+      DATABASE_URL: "postgresql://postgres:very_secure_postgres_password@db/gpt-api-proxy"
+      GPT_API_TOKEN: "sk-UDM5e0Rhc19oYXN0X2R1X2Rpcl93b2hsX3NvX2dlZGFjaHR9"
+    ports:
+      - "8000:80"
