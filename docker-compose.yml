@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: very_secure_postgres_password
       POSTGRES_DB: gpt-api-proxy
   gpt-api-proxy:
-    build: .
+    image: ghcr.io/port39/gpt-api-proxy:latest
     restart: always
     environment:
       API_KEY: "super_secure_api_token"
