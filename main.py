@@ -3,10 +3,11 @@ import requests
 import databases
 import sqlalchemy
 
-from fastapi import FastAPI, Depends
-from fastapi import Security, HTTPException
+from fastapi import FastAPI, Depends, Security, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.security.api_key import APIKey
 from fastapi.security.api_key import APIKeyHeader
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from random import random
 from starlette.status import HTTP_403_FORBIDDEN
@@ -44,6 +45,7 @@ metadata.create_all(engine)
 app = FastAPI()
 api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class CompletionRequest(BaseModel):
     query: str
@@ -118,3 +120,18 @@ async def completions(request_body: CompletionRequest, api_key: APIKey = Depends
 async def interactions():
     query = interactions_table.select()
     return await database.fetch_all(query)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    return """
+<html>
+  <head>
+  <title>Schreibmaschine</title>
+  <script src='static/main.js'></script>
+  <link rel='stylesheet' href='static/main.css'>
+  </head>
+  <body onload='update_data()'>
+  </body>
+</html>
+"""
