@@ -8,6 +8,6 @@ python-dotenv==1.0.0
 pyyaml==6.0.1
 requests==2.31.0
 uvicorn==0.23.2
-uvloop==0.17.0
+uvloop==0.18.0
 watchfiles==0.20.0
 websockets==11.0.3
