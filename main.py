@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from random import random
 from starlette.status import HTTP_403_FORBIDDEN
 from typing import List
+from contextlib import asynccontextmanager
 
 GPT_API_TOKEN = os.getenv("GPT_API_TOKEN")
 API_KEY = os.getenv("API_KEY")
@@ -42,10 +43,19 @@ interactions_table = sqlalchemy.Table(
 engine = sqlalchemy.create_engine(DATABASE_URL)
 metadata.create_all(engine)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await database.connect()
+    yield
+    await database.disconnect()
+
+
+app = FastAPI(lifespan=lifespan)
 api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 class CompletionRequest(BaseModel):
     query: str
@@ -90,16 +100,6 @@ async def query_gpt_completions_api(gpt_query: str) -> str:
         return query_response
     except KeyError:
         return data
-
-
-@app.on_event("startup")
-async def startup():
-    await database.connect()
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await database.disconnect()
 
 
 async def verify_api_key(api_key_header: str = Security(api_key_header)):
